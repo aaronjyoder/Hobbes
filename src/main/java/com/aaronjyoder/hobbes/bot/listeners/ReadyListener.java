@@ -6,9 +6,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class ReadyListener extends ListenerAdapter {
 
-    @Override
-    public void onReady(@NotNull ReadyEvent event) {
-        System.out.println("[ReadyEvent] All systems ready.");
-    }
+  @Override
+  public void onReady(@NotNull ReadyEvent event) {
+    System.out.println("[ReadyEvent] All systems ready.");
+  }
 
 }

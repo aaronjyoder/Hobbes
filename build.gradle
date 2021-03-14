@@ -17,11 +17,13 @@ jar {
 repositories {
     mavenCentral()
     jcenter()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
 
-    implementation 'net.dv8tion:JDA:4.2.0_228'
+    implementation 'com.github.DV8FromTheWorld:JDA:feature~slash-commands-SNAPSHOT'
+//    implementation 'net.dv8tion:JDA:4.2.0_228'
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'org.reflections:reflections:0.9.12'
 

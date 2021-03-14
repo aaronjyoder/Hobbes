@@ -1,109 +1,156 @@
 package com.aaronjyoder.hobbes.bot;
 
 import com.aaronjyoder.hobbes.Main;
+import com.aaronjyoder.hobbes.bot.input.Input;
+import com.aaronjyoder.hobbes.bot.input.MessageInput;
+import com.aaronjyoder.hobbes.bot.input.SlashInput;
+import com.aaronjyoder.hobbes.bot.input.raw.RawInput;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 
-import java.net.URL;
-import java.util.*;
-
 public class CommandHandler {
 
-    public static final List<Command> commands = new ArrayList<>();
+  private static final List<Command> commands = new ArrayList<>();
 
-    public CommandHandler() {
-        try {
-            Set<URL> classPathList = new HashSet<>(ClasspathHelper.forJavaClassPath());
-            Set<Class<? extends Command>> result = new Reflections(
-                    new ConfigurationBuilder().setScanners(new SubTypesScanner()).setUrls(classPathList))
-                    .getSubTypesOf(Command.class);
+  public CommandHandler() {
+    try {
+      Set<URL> classPathList = new HashSet<>(ClasspathHelper.forJavaClassPath());
+      Set<Class<? extends Command>> result = new Reflections(
+          new ConfigurationBuilder().setScanners(new SubTypesScanner()).setUrls(classPathList))
+          .getSubTypesOf(Command.class);
 
-            for (Class<? extends Command> c : result) {
-                String[] categoryString = c.getPackage().toString().split("\\.");
-                String category = categoryString[categoryString.length - 1];
-                if (category.equalsIgnoreCase("commands")) {
-                    category = "default";
-                }
-                Command command = c.getDeclaredConstructor().newInstance();
-                command.settings.setCategory(category);
-                commands.add(command);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+      for (Class<? extends Command> cmd : result) {
+        String[] categoryString = cmd.getPackage().toString().split("\\.");
+        String category = categoryString[categoryString.length - 1];
+        if (category.equalsIgnoreCase("commands")) {
+          category = "default";
         }
+        Command command = cmd.getDeclaredConstructor().newInstance();
+        command.settings.setCategory(category);
+        commands.add(command);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
+  }
 
-    /**
-     * Parses the input, then executes the command if it exists.
-     */
-    public void execute(CommandInput input) {
-        Command result = parse(input);
-        if (result != null && isValid(input, result)) {
-            result.execute(input);
+
+  /**
+   * Parses the raw input, gets a command from the parsed input, and then executes the command if it exists.
+   *
+   * @param rawInput The raw input provided by the user.
+   */
+  public void process(RawInput rawInput) {
+    Input input = parse(rawInput);
+    Optional<Command> result = getCommand(input);
+    switch (input.type()) {
+      case SLASH -> result.ifPresent(cmd -> {
+        cmd.execute((SlashInput) input); // TODO: canExecute method for SlashInput
+      });
+      case MESSAGE -> result.ifPresent(cmd -> {
+        if (canExecute(cmd, (MessageInput) input)) {
+          cmd.execute((MessageInput) input);
         }
+      });
     }
+  }
 
-    /**
-     * Figures out what the command is.
-     */
-    private Command parse(CommandInput input) {
-        Command result = null;
-        String msg = input.getEvent().getMessage().getContentRaw();
+  /**
+   * Parses the command and returns a processed input object, or null if processing fails.
+   *
+   * @param rawInput The raw input from the user.
+   * @return A more processed version of the input. This can be null.
+   */
+  private Input parse(RawInput rawInput) {
+    return switch (rawInput.type()) {
+      case MESSAGE -> {
+        MessageReceivedEvent event = (MessageReceivedEvent) rawInput.event();
+
+        String msg = event.getMessage().getContentRaw();
 
         boolean startsWithDefaultPrefix = msg.startsWith(Main.bot.getDefaultPrefix());
         boolean startsWithPrefix = msg.startsWith(Main.bot.getPrefix());
-        boolean startsWithMention = msg.startsWith("<@!" + input.getEvent().getJDA().getSelfUser().getId() + ">");
-        boolean isPrivateChannel = input.getEvent().isFromType(ChannelType.PRIVATE);
+        boolean startsWithMention = msg.startsWith("<@!" + event.getJDA().getSelfUser().getId() + ">");
+        boolean isPrivateChannel = event.isFromType(ChannelType.PRIVATE);
 
         String[] args = null;
 
         if (startsWithDefaultPrefix) {
-            args = msg.replaceFirst(Main.bot.getDefaultPrefix(), "").trim().split("\\s+");
+          args = msg.replaceFirst(Main.bot.getDefaultPrefix(), "").trim().split("\\s+");
         } else if (startsWithPrefix) {
-            args = msg.replaceFirst(Main.bot.getPrefix(), "").trim().split("\\s+");
+          args = msg.replaceFirst(Main.bot.getPrefix(), "").trim().split("\\s+");
         } else if (startsWithMention) {
-            args = msg.replaceFirst("<@!" + input.getEvent().getJDA().getSelfUser().getId() + ">", "").trim().split("\\s+");
+          args = msg.replaceFirst("<@!" + event.getJDA().getSelfUser().getId() + ">", "").trim().split("\\s+"); // TODO: Don't parse mentions like this
         } else if (isPrivateChannel) {
-            args = msg.trim().split("\\s+");
+          args = msg.trim().split("\\s+");
         }
 
         if (args == null) {
-            return null;
+          yield null;
         }
 
-        input.setCommandAlias(args[0]); // Command alias should always be the first entry
-        input.setArguments(args.length == 1 ? new String[0] : Arrays.copyOfRange(args, 1, args.length)); // Skip command alias, if there are no args set it as empty array
+        String alias = args[0]; // Command alias should always be the first entry
+        final String[] finalArgs = args.length == 1 ? new String[0] : Arrays.copyOfRange(args, 1, args.length); // Skip command alias, if there are no args set it as empty array
 
-        for (Command command : commands) {
-            if (Arrays.asList(command.settings.getAliases()).contains(input.getCommandAlias())) {
-                result = command;
-                break;
-            }
-        }
+        yield new MessageInput(event, alias, finalArgs);
+      }
+      case SLASH -> new SlashInput((SlashCommandEvent) rawInput.event());
+    };
+  }
 
-        return result;
+  /**
+   * Uses the parsed input to find the associated command. Then it returns that command if it exists. If the input is null, it returns an empty Optional to ensure a command never
+   * executes on a null input.
+   *
+   * @param input The parsed command input.
+   * @return The command associated with the processed input, if it exists.
+   */
+  private Optional<Command> getCommand(Input input) {
+    if (input == null) {
+      return Optional.empty();
     }
-
-    /**
-     * Determines if the command is valid to use based on who is using it and the settings for that command.
-     */
-    private boolean isValid(CommandInput input, Command c) {
-        if (c.settings.isOwnerCommand() && !input.getEvent().getAuthor().getId().equals(Main.bot.getAuth().getOwnerID())) {
-            return false;
-        }
-        if (c.settings.isGuildOnly() && !input.getEvent().isFromType(ChannelType.TEXT)) {
-            return false;
-        }
-        if (c.settings.getSelfPermissions() != null && !input.getEvent().getGuild().getSelfMember().hasPermission(c.settings.getSelfPermissions())) {
-            return false;
-        }
-        if (c.settings.getAuthorPermissions() != null && !input.getEvent().getMember().hasPermission(c.settings.getAuthorPermissions())) { // technically could have left guild by the time this happens
-            return false;
-        }
-        return true;
+    for (Command command : commands) {
+      if (Arrays.asList(command.settings.getAliases()).contains(input.alias())) {
+        return Optional.of(command);
+      }
     }
+    return Optional.empty();
+  }
+
+  /**
+   * Determines if the command is valid to use based on who is using it and the settings for that command.
+   */
+  private boolean canExecute(Command cmd, MessageInput input) {
+    if (cmd.settings.isDisabled()) {
+      return false;
+    }
+    if (cmd.settings.isOwnerCommand() && !input.event().getAuthor().getId().equals(Main.bot.getAuth().getOwnerID())) {
+      return false;
+    }
+    if (cmd.settings.isGuildOnly() && !input.event().isFromGuild()) {
+      return false;
+    }
+    if (input.event().isFromGuild() && !input.event().getGuild().getSelfMember().hasPermission(cmd.settings.getSelfPermissions())) {
+      return false;
+    }
+    Member member = input.event().getMember();
+    if (member != null && !member.hasPermission(cmd.settings.getAuthorPermissions())) {
+      return false;
+    }
+    return true;
+  }
 
 }

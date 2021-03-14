@@ -2,18 +2,30 @@ package com.aaronjyoder.hobbes.bot.commands;
 
 
 import com.aaronjyoder.hobbes.bot.Command;
-import com.aaronjyoder.hobbes.bot.CommandInput;
+import com.aaronjyoder.hobbes.bot.input.MessageInput;
+import com.aaronjyoder.hobbes.bot.input.SlashInput;
+import net.dv8tion.jda.api.JDA;
 
 public class Ping extends Command {
 
-    public Ping() {
-        settings.setAliases("ping");
-        settings.setDescription("Tests to see if the bot is online and functional.");
-    }
+  public Ping() {
+    settings.setAliases("ping");
+    settings.setDescription("Tests to see if the bot is online and functional.");
+  }
 
-    @Override
-    protected void execute(CommandInput input) {
-        input.getEvent().getChannel().sendMessage("Pong! :table_tennis: | Response in `" + input.getEvent().getJDA().getRestPing().complete().toString() + "ms`").queue();
-    }
+  @Override
+  protected void execute(SlashInput input) {
+    input.event().getThread().setEphemeral(true);
+    input.event().reply(pingMessage(input.event().getJDA())).queue();
+  }
+
+  @Override
+  protected void execute(MessageInput input) {
+    input.event().getChannel().sendMessage(pingMessage(input.event().getJDA())).queue();
+  }
+
+  private String pingMessage(JDA jda) {
+    return "Pong! :table_tennis: | Response in `" + jda.getRestPing().complete().toString() + "ms`";
+  }
 
 }

@@ -1,90 +1,98 @@
 package com.aaronjyoder.hobbes.bot;
 
+import java.awt.Color;
 import net.dv8tion.jda.api.Permission;
-
-import java.awt.*;
 
 public class CommandSettings {
 
-    private boolean isOwnerCommand;
-    private boolean isGuildOnly;
-    private Permission[] authorPermissions;
-    private Permission[] selfPermissions;
-    private String[] aliases;
-    private String description;
-    private Color embedColor = new Color(128, 128, 128);
-    private String category;
+  private boolean isDisabled;
+  private boolean isOwnerCommand;
+  private boolean isGuildOnly;
+  private Permission[] authorPermissions = new Permission[0];
+  private Permission[] selfPermissions = new Permission[0];
+  private String[] aliases;
+  private String description;
+  private Color embedColor = new Color(128, 128, 128);
+  private String category;
 
-    // Getters
+  // Getters
 
-    public boolean isOwnerCommand() {
-        return isOwnerCommand;
-    }
+  public boolean isDisabled() {
+    return isDisabled;
+  }
 
-    public boolean isGuildOnly() {
-        return isGuildOnly;
-    }
+  public boolean isOwnerCommand() {
+    return isOwnerCommand;
+  }
 
-    public Permission[] getAuthorPermissions() {
-        return authorPermissions;
-    }
+  public boolean isGuildOnly() {
+    return isGuildOnly;
+  }
 
-    public Permission[] getSelfPermissions() {
-        return selfPermissions;
-    }
+  public Permission[] getAuthorPermissions() {
+    return authorPermissions;
+  }
 
-    public String[] getAliases() {
-        return aliases;
-    }
+  public Permission[] getSelfPermissions() {
+    return selfPermissions;
+  }
 
-    public String getName() {
-        return aliases[0];
-    }
+  public String[] getAliases() {
+    return aliases;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public String getName() {
+    return aliases[0];
+  }
 
-    public Color getEmbedColor() {
-        return embedColor;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public String getCategory() {
-        return category;
-    }
+  public Color getEmbedColor() {
+    return embedColor;
+  }
 
-    // Setters
+  public String getCategory() {
+    return category;
+  }
 
-    public void setOwnerCommand(boolean isOwnerCommand) {
-        this.isOwnerCommand = isOwnerCommand;
-    }
+  // Setters
 
-    public void setGuildOnly(boolean isGuildOnly) {
-        this.isGuildOnly = isGuildOnly;
-    }
+  public void setDisabled(boolean isDisabled) {
+    this.isDisabled = isDisabled;
+  }
 
-    public void setAuthorPerms(Permission... authorPermissions) {
-        this.authorPermissions = authorPermissions;
-    }
+  public void setOwnerCommand(boolean isOwnerCommand) {
+    this.isOwnerCommand = isOwnerCommand;
+  }
 
-    public void setSelfPerms(Permission... selfPermissions) {
-        this.selfPermissions = selfPermissions;
-    }
+  public void setGuildOnly(boolean isGuildOnly) {
+    this.isGuildOnly = isGuildOnly;
+  }
 
-    public void setAliases(String... aliases) {
-        this.aliases = aliases;
-    }
+  public void setAuthorPerms(Permission... authorPermissions) {
+    this.authorPermissions = authorPermissions;
+  }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  public void setSelfPerms(Permission... selfPermissions) {
+    this.selfPermissions = selfPermissions;
+  }
 
-    public void setEmbedColor(int r, int g, int b) {
-        this.embedColor = new Color(r, g, b);
-    }
+  public void setAliases(String... aliases) {
+    this.aliases = aliases;
+  }
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public void setEmbedColor(int r, int g, int b) {
+    this.embedColor = new Color(r, g, b);
+  }
+
+  public void setCategory(String category) {
+    this.category = category;
+  }
 
 }
