@@ -4,7 +4,9 @@ package com.aaronjyoder.hobbes.bot.commands;
 import com.aaronjyoder.hobbes.bot.Command;
 import com.aaronjyoder.hobbes.bot.input.MessageInput;
 import com.aaronjyoder.hobbes.bot.input.SlashInput;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Command.OptionType;
 
 public class Ping extends Command {
 

@@ -60,6 +60,7 @@ public class Bot {
       DefaultShardManagerBuilder shardBuilder = DefaultShardManagerBuilder.createDefault(auth.getToken());
       shardBuilder.addEventListeners(listeners);
       shardBuilder.build();
+
     } catch (LoginException e) {
       e.printStackTrace();
     }

@@ -1,5 +1,8 @@
 package com.aaronjyoder.hobbes.bot.input;
 
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class MessageInput implements Input {
@@ -43,6 +46,5 @@ public class MessageInput implements Input {
     }
     return sb.toString().trim();
   }
-
 
 }
