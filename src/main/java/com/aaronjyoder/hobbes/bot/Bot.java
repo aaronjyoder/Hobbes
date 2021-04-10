@@ -1,24 +1,26 @@
 package com.aaronjyoder.hobbes.bot;
 
-import com.aaronjyoder.hobbes.auth.Authentication;
-import com.google.gson.Gson;
+import com.aaronjyoder.hobbes.auth.AuthRecord;
+import com.aaronjyoder.hobbes.auth.RecordsJsonAdapterFactory;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 import java.io.File;
-import java.io.FileReader;
-import java.io.Reader;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Instant;
-import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 
 public class Bot {
 
-  private final CommandHandler commandHandler = new CommandHandler();
-  private final Authentication auth;
+  private final CommandHandler commandHandler;
+  private final AuthRecord auth;
   private final Instant startTime;
 
   public Bot() {
     this.startTime = Instant.now();
-    this.auth = readAuth();
+    this.auth = readAuthRecord();
+    this.commandHandler = new CommandHandler();
   }
 
   public Instant getStartTime() {
@@ -29,38 +31,29 @@ public class Bot {
     return commandHandler;
   }
 
-  public Authentication getAuth() {
+  public AuthRecord auth() {
     return auth;
   }
 
-  public String getDefaultPrefix() {
-    return auth.getDefaultPrefix();
-  }
-
-  public String getPrefix() {
-    return auth.getPrefix();
-  }
-
-  private Authentication readAuth() {
+  private AuthRecord readAuthRecord() {
     File file = new File("res/auth/auth.json");
     if (file.exists()) {
-      Gson gson = new Gson();
+      Moshi moshi = new Moshi.Builder().add(new RecordsJsonAdapterFactory()).build(); // TODO: Moshi does not currently support Records
+      JsonAdapter<AuthRecord> jsonAdapter = moshi.adapter(AuthRecord.class);
       try {
-        Reader reader = new FileReader(file);
-        return gson.fromJson(reader, Authentication.class);
-      } catch (Exception e) {
+        return jsonAdapter.fromJson(Files.readString(file.toPath()));
+      } catch (IOException e) {
         e.printStackTrace();
       }
     }
-    return null;
+    return new AuthRecord("TOKEN", "CLIENT_ID", "OWNER_ID", "PREFIX");
   }
 
-  public void start(@Nonnull final Object... listeners) {
+  public void start(final Object... listeners) {
     try {
-      DefaultShardManagerBuilder shardBuilder = DefaultShardManagerBuilder.createDefault(auth.getToken());
+      DefaultShardManagerBuilder shardBuilder = DefaultShardManagerBuilder.createDefault(auth.token());
       shardBuilder.addEventListeners(listeners);
       shardBuilder.build();
-
     } catch (LoginException e) {
       e.printStackTrace();
     }

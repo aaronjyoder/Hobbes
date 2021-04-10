@@ -4,9 +4,8 @@ package com.aaronjyoder.hobbes.bot.commands;
 import com.aaronjyoder.hobbes.bot.Command;
 import com.aaronjyoder.hobbes.bot.input.MessageInput;
 import com.aaronjyoder.hobbes.bot.input.SlashInput;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Command.OptionType;
+import net.dv8tion.jda.api.commands.CommandHook;
 
 public class Ping extends Command {
 
@@ -17,8 +16,9 @@ public class Ping extends Command {
 
   @Override
   protected void execute(SlashInput input) {
-    input.event().getThread().setEphemeral(true);
-    input.event().reply(pingMessage(input.event().getJDA())).queue();
+    input.event().acknowledge(true).queue();
+    CommandHook hook = input.event().getHook();
+    hook.setEphemeral(true).sendMessage(pingMessage(input.event().getJDA())).queue();
   }
 
   @Override

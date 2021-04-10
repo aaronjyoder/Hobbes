@@ -1,6 +1,7 @@
 package com.aaronjyoder.hobbes.bot;
 
 import java.awt.Color;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 
 public class CommandSettings {
@@ -93,6 +94,12 @@ public class CommandSettings {
 
   public void setCategory(String category) {
     this.category = category;
+  }
+
+  // Utility
+
+  public EmbedBuilder embedBuilder() {
+    return new EmbedBuilder().setColor(getEmbedColor());
   }
 
 }

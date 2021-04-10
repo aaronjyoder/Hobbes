@@ -3,6 +3,7 @@ package com.aaronjyoder.hobbes;
 import com.aaronjyoder.hobbes.bot.Bot;
 import com.aaronjyoder.hobbes.bot.listeners.MessageListener;
 import com.aaronjyoder.hobbes.bot.listeners.ReadyListener;
+import net.dv8tion.jda.api.requests.restaction.CommandUpdateAction;
 
 public class Main {
 

@@ -11,4 +11,6 @@ public abstract class Command {
 
   protected abstract void execute(MessageInput input);
 
+
+
 }
