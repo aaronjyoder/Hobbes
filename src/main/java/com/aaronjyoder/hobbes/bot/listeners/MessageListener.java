@@ -13,14 +13,16 @@ public class MessageListener implements EventListener {
 
   @Override
   public void onEvent(GenericEvent event) {
-    RawInput input = null;
+    RawInput input;
     if (event instanceof SlashCommandEvent scEvent) {
       input = new RawSlashInput(scEvent);
     } else if (event instanceof MessageReceivedEvent mrEvent) {
       input = new RawMessageInput(mrEvent);
+    } else {
+      input = null;
     }
     if (input != null && input.isForBot()) {
-      Main.bot.getCommandHandler().process(input);
+      new Thread(() -> Main.bot.getCommandHandler().process(input)).start();
     }
   }
 
