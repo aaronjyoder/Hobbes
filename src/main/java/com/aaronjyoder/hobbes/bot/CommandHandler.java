@@ -24,10 +24,10 @@ import org.reflections.util.ConfigurationBuilder;
 
 public class CommandHandler {
 
-  private static final List<Command> commands = new ArrayList<>();
+  private final List<Command> commands = new ArrayList<>();
 
   // TODO: Implement automatic command registering for Slash Commands
-  public CommandHandler() { // Initializes all classes extending Command in the commands directory using reflection, then adds them to the list.
+  public CommandHandler() {
     try {
       Set<URL> classPathList = new HashSet<>(ClasspathHelper.forJavaClassPath());
       Set<Class<? extends Command>> result = new Reflections(
