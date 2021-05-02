@@ -1,7 +1,6 @@
 package com.aaronjyoder.hobbes.bot;
 
 import com.aaronjyoder.hobbes.auth.AuthRecord;
-import com.aaronjyoder.hobbes.auth.RecordsJsonAdapterFactory;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import java.io.File;
@@ -38,7 +37,7 @@ public class Bot {
   private AuthRecord readAuthRecord() {
     File file = new File("res/auth/auth.json");
     if (file.exists()) {
-      Moshi moshi = new Moshi.Builder().add(new RecordsJsonAdapterFactory()).build(); // TODO: Moshi does not currently support Records
+      Moshi moshi = new Moshi.Builder().build();
       JsonAdapter<AuthRecord> jsonAdapter = moshi.adapter(AuthRecord.class);
       try {
         return jsonAdapter.fromJson(Files.readString(file.toPath()));
