@@ -1,6 +1,7 @@
 package com.aaronjyoder.hobbes.command;
 
 import java.awt.Color;
+import java.util.List;
 import javax.annotation.Nonnull;
 
 public interface Settings {
@@ -17,11 +18,11 @@ public interface Settings {
 
   @Nonnull
   default String getName() {
-    return getAliases()[0];
+    return getAliases().get(0);
   }
 
   @Nonnull
-  String[] getAliases();
+  List<String> getAliases();
 
   @Nonnull
   String getDescription();
